@@ -1,0 +1,8 @@
+/dist
+*.iml
+.idea
+
+*.crx
+*.pem
+
+/node_modules

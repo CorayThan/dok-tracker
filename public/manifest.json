@@ -1,0 +1,25 @@
+{
+  "name": "Sassiest Doktension",
+  "version": "1.0",
+  "description": "Sasses dokfully",
+  "manifest_version": 3,
+  "icons": {
+    "48": "icon48.png"
+  },
+  "host_permissions": [
+    "*://decksofkeyforge.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "js": [
+        "content.js"
+      ],
+      "matches": [
+        "*://thecrucible.online/*"
+      ]
+    }
+  ]
+}
