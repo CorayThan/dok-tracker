@@ -35,6 +35,7 @@ const filterMessagesBy = [
 ]
 
 let firstWinReport = true
+let lastReportTime = 0
 
 const reportWin = (gameChat: Element, continueButton: HTMLButtonElement, reportButton: HTMLButtonElement | null, viewReportbutton: HTMLButtonElement | null) => {
 
@@ -75,8 +76,12 @@ const reportWin = (gameChat: Element, continueButton: HTMLButtonElement, reportB
     })
 
     firstWinReport = false
+    const now = Date.now()
+    const millisSinceLastReport = now - lastReportTime
 
-    if (readableMessages.length > 1) {
+    const noReportWithin5Sec = millisSinceLastReport > 5000
+
+    if (readableMessages.length > 1 && noReportWithin5Sec) {
         const gameReport: GameReport = {
             playerOne: playerFromMessage(readableMessages[0]),
             playerOneDeckId: deckFromMessage(systemMessages.item(0)),
@@ -84,25 +89,19 @@ const reportWin = (gameChat: Element, continueButton: HTMLButtonElement, reportB
             playerTwoDeckId: deckFromMessage(systemMessages.item(1)),
             messages: readableMessages.slice(2)
         }
-        console.log("Found gamereport consisting of: " + JSON.stringify(gameReport, null, 2))
+        console.log("Sending gamereport!")
+
+        lastReportTime = now
+        chrome.runtime.sendMessage(
+            {type: "report-game", gameReport},
+        )
 
         const reportButton = document.createElement("button")
-        reportButton.setAttribute("title", "Report Game")
-        reportButton.innerText = "Report Game"
+        reportButton.setAttribute("title", "View Games")
+        reportButton.innerText = "View Games"
         reportButton.classList.add("btn", "btn-default", "prompt-button", "btn-stretch")
         reportButton.onclick = () => {
-            reportButton.disabled = true
-            chrome.runtime.sendMessage(
-                {type: "report-game", gameReport},
-                (response: string) => {
-                    reportButton.innerText = "View Game Report"
-                    reportButton.setAttribute("title", "View Game Report")
-                    reportButton.onclick = () => {
-                        window.open("https://decksofkeyforge.com/game-results/" + response, "_blank")?.focus()
-                    }
-                    reportButton.disabled = false
-                }
-            )
+            window.open("https://decksofkeyforge.com/games-tracker/search", "_blank")?.focus()
         }
         const buttonsParent = continueButton.parentNode
         buttonsParent?.insertBefore(reportButton, continueButton)
