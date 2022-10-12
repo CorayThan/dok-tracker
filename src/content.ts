@@ -37,6 +37,8 @@ const filterMessagesBy = [
 let firstWinReport = true
 let lastReportTime = 0
 
+let lastReportSent = ""
+
 const reportWin = (gameChat: Element, continueButton: HTMLButtonElement, reportButton: HTMLButtonElement | null, viewReportbutton: HTMLButtonElement | null) => {
 
     if (reportButton != null || viewReportbutton != null) {
@@ -56,9 +58,9 @@ const reportWin = (gameChat: Element, continueButton: HTMLButtonElement, reportB
                 if (toAdd.length > 0) {
                     rawMessage += (span.innerText.trim() + " ")
                 }
-                if (firstWinReport) {
-                    console.log(`building message: '${rawMessage}'`)
-                }
+                // if (firstWinReport) {
+                //     console.log(`building message: '${rawMessage}'`)
+                // }
             })
             rawMessage = rawMessage.trim()
             if (rawMessage.length > 0 && filterMessagesBy.find(toFilter => rawMessage.includes(toFilter)) == null) {
@@ -81,14 +83,18 @@ const reportWin = (gameChat: Element, continueButton: HTMLButtonElement, reportB
 
     const noReportWithin5Sec = millisSinceLastReport > 5000
 
-    if (readableMessages.length > 1 && noReportWithin5Sec) {
-        const gameReport: GameReport = {
-            playerOne: playerFromMessage(readableMessages[0]),
-            playerOneDeckId: deckFromMessage(systemMessages.item(0)),
-            playerTwo: playerFromMessage(readableMessages[1]),
-            playerTwoDeckId: deckFromMessage(systemMessages.item(1)),
-            messages: readableMessages.slice(2)
-        }
+    const gameReport: GameReport = {
+        playerOne: playerFromMessage(readableMessages[0]),
+        playerOneDeckId: deckFromMessage(systemMessages.item(0)),
+        playerTwo: playerFromMessage(readableMessages[1]),
+        playerTwoDeckId: deckFromMessage(systemMessages.item(1)),
+        messages: readableMessages.slice(2)
+    }
+    const stringGameReport = JSON.stringify(gameReport)
+
+    if (readableMessages.length > 1 && noReportWithin5Sec && lastReportSent !== stringGameReport) {
+
+        lastReportSent = stringGameReport
         console.log("Sending gamereport!")
 
         lastReportTime = now
